@@ -8,6 +8,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Clase Principal. Front con JOptionPane
+ *
+ * @author Santiago Torres
+ */
 public class Main {
     public static void main(String[] args) {
         // Set LookAndFeel to system default for a more modern appearance
