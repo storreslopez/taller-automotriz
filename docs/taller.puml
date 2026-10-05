@@ -1,0 +1,126 @@
+@startuml
+title Taller Automotriz
+
+package modelo {
+
+    abstract class Persona {
+        - id: String {readOnly}
+        - nombre: String
+        # Persona(nombre: String)
+        + getId(): String
+        + getNombre(): String
+        + {abstract} mostrarDetalles(): String
+    }
+
+    class Cliente {
+        - telefono: String
+        - email: String
+        + Cliente(nombre: String, telefono: String, email: String)
+        + getTelefono(): String
+        + setTelefono(telefono: String)
+        + getEmail(): String
+        + setEmail(email: String)
+        + getVehiculos(): List<Vehiculo>
+        + agregarVehiculo(v: Vehiculo)
+        + mostrarDetalles(): String
+    }
+
+    class Mecanico {
+        - especialidad: String
+        + Mecanico(nombre: String, especialidad: String)
+        + getEspecialidad(): String
+        + mostrarDetalles(): String
+    }
+
+    class ZonaTrabajo {
+        - nombre: String
+        + ZonaTrabajo(nombre: String)
+        + getNombre(): String
+        + getMecanicos(): List<Mecanico>
+        + asignarMecanico(m: Mecanico)
+        + trasladarMecanico(m: Mecanico, destino: ZonaTrabajo)
+    }
+
+    class Vehiculo {
+        - placa: String
+        - marca: String
+        - modelo: String
+        - anio: int
+        - kilometraje: int
+        + Vehiculo(placa: String, marca: String, modelo: String, anio: int, kilometraje: int)
+        + getPlaca(): String
+        + getMarca(): String
+        + getModelo(): String
+        + getAnio(): int
+        + getKilometraje(): int
+        + setKilometraje(kilometraje: int)
+        + getOrdenes(): List<OrdenServicio>
+        ~ registrarOrden(o: OrdenServicio)
+    }
+
+    class OrdenServicio {
+        - id: String {readOnly}
+        - fechaIngreso: LocalDateTime
+        - motivo: String
+        - valorTotal: double
+        - estado: EstadoOrden
+        + OrdenServicio(vehiculo: Vehiculo, mecanico: Mecanico, fechaIngreso: LocalDateTime, motivo: String)
+        + getId(): String
+        + getFechaIngreso(): LocalDateTime
+        + getMotivo(): String
+        + getValorTotal(): double
+        + getEstado(): EstadoOrden
+        + getVehiculo(): Vehiculo
+        + getMecanico(): Mecanico
+        + getActividades(): List<Actividad>
+        + agregarActividad(descripcion: String, valorManoObra: double, minutosEmpleados: int)
+        + iniciar()
+        + finalizar()
+        + cancelar()
+        ~ actualizarTotal(valor: double)
+    }
+
+    class Actividad {
+        - descripcion: String
+        - valorManoObra: double
+        - minutosEmpleados: int
+        + Actividad(descripcion: String, valorManoObra: double, minutosEmpleados: int)
+        + getDescripcion(): String
+        + getValorManoObra(): double
+        + getMinutosEmpleados(): int
+    }
+
+    class ServicioCalculoOrden {
+        + calcularValorFinal(orden: OrdenServicio, porcentajeDescuento: double): double
+    }
+
+    enum EstadoOrden {
+        RECIBIDA
+        EN_PROCESO
+        FINALIZADA
+        CANCELADA
+    }
+}
+
+Persona <|-- Cliente
+Persona <|-- Mecanico
+
+Cliente "1" --> "0..*" Vehiculo : registra
+Vehiculo "1" o-- "0..*" OrdenServicio : conserva historial
+OrdenServicio "0..*" --> "1" Mecanico : responsable de
+OrdenServicio "1" *-- "0..*" Actividad : compuesta por
+OrdenServicio --> EstadoOrden : tiene
+ZonaTrabajo "0..1" o--> "0..*" Mecanico : agrupa
+ServicioCalculoOrden ..> OrdenServicio : calcula valor de
+
+note right of Actividad
+  Lanza IllegalArgumentException
+  si valorManoObra < 0
+end note
+
+note right of ServicioCalculoOrden
+  Suma las actividades, aplica el descuento
+  y llama a orden.actualizarTotal(valor).
+  No guarda la orden como atributo.
+end note
+@enduml
